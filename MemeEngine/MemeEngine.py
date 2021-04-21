@@ -2,6 +2,7 @@
 import random
 import os
 from PIL import Image, ImageDraw, ImageFont
+from utils.Text import text_wrap
 
 
 class MemeEngine:
@@ -14,15 +15,20 @@ class MemeEngine:
     @staticmethod
     def resize_image(image, width):
         """Resize image with to with arg if needed."""
-        if image.size[0] > width:
+        if image.size[0] < width:
             return image
         ratio = width / float(image.size[0])
         height = int(ratio * float(image.size[1]))
         image = image.resize((width, height), Image.NEAREST)
+
         return image
 
     @staticmethod
-    def draw_text(image, text, author,):
+    def text_wrap(image, text, font):
+        """Wrap text if needed."""
+
+    @staticmethod
+    def draw_text(image, text, author):
         """Add quote to image."""
         if text is None:
             raise Exception('Text Required')
@@ -31,11 +37,29 @@ class MemeEngine:
             message = f"{text} {author}"
             draw = ImageDraw.Draw(image)
             font = ImageFont.truetype('./font/LilitaOne-Regular.ttf', size=20)
-            position = (
-                random.choice(range(0, 100)),
-                random.choice(range(0, 100))
-            )
-            draw.text(position, message, font=font, fill='white')
+
+            #  define random x positions
+            x_min = (image.size[0] * 8) // 100
+            x_max = (image.size[0] * 50) // 100
+            ran_x = random.randint(x_min, x_max)
+
+            #  define line height
+            lines = text_wrap(message, font, image.size[0] - ran_x)
+            line_height = font.getsize('hg')[1]
+
+            # define y position depending on x and line height
+            y_min = (image.size[1] * 4) // 100  # 4% from the top
+            y_max = (image.size[1] * 90) // 100  # 90% to the bottom
+            y_max -= (len(lines) * line_height)  # Adjust
+            ran_y = random.randint(y_min, y_max)  # Generate random point
+
+            # define x and y position
+            x = ran_x
+            y = ran_y
+
+            for line in lines:
+                draw.text((x, y), line, font=font, fill='white')
+                y = y + line_height
             del draw
 
     def make_meme(self, img_path, text, author, width=500):
