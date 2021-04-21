@@ -24,10 +24,6 @@ class MemeEngine:
         return image
 
     @staticmethod
-    def text_wrap(image, text, font):
-        """Wrap text if needed."""
-
-    @staticmethod
     def draw_text(image, text, author):
         """Add quote to image."""
         if text is None:
